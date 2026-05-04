@@ -241,40 +241,50 @@ if generate:
                 # ----------------------------
                 # カード表示
                 # ----------------------------
-                st.markdown("## 🚨 重要判断")
+                st.markdown("### 🚨 重要判断")
 
-                st.markdown(f"""
-                <div style="display:flex; gap:20px;">
-                    <div style="
-                        flex:1;
-                        padding:20px;
-                        border-radius:15px;
-                        background-color:{risk_color};
-                        color:white;
-                        text-align:center;
-                    ">
-                        <h3>リスクレベル</h3>
-                        <h2>{risk_level}</h2>
-                    </div>
+                card1, card2 = st.columns(2)
 
-                <div style="
-                        flex:1;
-                        padding:20px;
-                        border-radius:15px;
-                        background-color:#34495e;
-                        color:white;
-                        text-align:center;
-                    ">
-                        <h3>責任者共有</h3>
-                        <h2>{manager}</h2>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                with card1:
+                    st.markdown(
+                        f"""
+                        <div style="
+                            padding:14px 18px;
+                            border-radius:14px;
+                            background-color:{risk_color};
+                            color:white;
+                            text-align:center;
+                            min-height:95px;
+                        ">
+                            <div style="font-size:15px; font-weight:600;">リスクレベル</div>
+                            <div style="font-size:30px; font-weight:700; margin-top:8px;">{risk_level}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                with card2:
+                    st.markdown(
+                        f"""
+                        <div style="
+                            padding:14px 18px;
+                            border-radius:14px;
+                            background-color:#34495e;
+                            color:white;
+                            text-align:center;
+                            min-height:95px;
+                        ">
+                            <div style="font-size:15px; font-weight:600;">責任者共有</div>
+                            <div style="font-size:30px; font-weight:700; margin-top:8px;">{manager}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
                 # ----------------------------
                 # 全文表示
                 # ----------------------------
-                st.markdown("## 📋 詳細対応")
+                st.markdown("### 📋 詳細対応")
 
                 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
                     "第一声",
@@ -303,14 +313,14 @@ if generate:
                 with tab6:
                     st.markdown(extract_section(answer, "記録すべき内容"))
 
-                st.markdown("## 📄 全文コピー用")
+                st.markdown("### 📄 全文コピー用")
 
                 with st.expander("全文を表示する"):
                     st.code(answer, language="markdown")
 
                 st.download_button(
                     label="📥 生成結果をテキスト保存",
-                    data=answer,
+                    data=st.session_state.answer,
                     file_name="complaint_response.txt",
                     mime="text/plain",
                     use_container_width=True
