@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+import re
 
 st.set_page_config(
     page_title="ホテル接遇AIアシスタント",
@@ -200,18 +201,119 @@ if generate:
                     temperature=0.2,
                 )
 
+                
+
                 answer = response.choices[0].message.content
 
-                st.markdown("## ✅ 生成結果")
-                st.markdown('<div class="result-box">', unsafe_allow_html=True)
-                st.markdown(answer)
-                st.markdown('</div>', unsafe_allow_html=True)
+                # ----------------------------
+                # リスク情報を抽出
+                # ----------------------------
+                risk_level = "不明"
+                manager = "不明"
+
+                def extract_field(text, field):
+                    match = re.search(rf"{field}.*?\n(.*)", text)
+                    return match.group(1).strip() if match else "不明"
+
+                risk_level = extract_field(answer, "リスクレベル")
+                manager = extract_field(answer, "責任者共有の要否")
+
+                def extract_section(text, title):
+                    pattern = rf"## {title}\n(.*?)(?=\n## |\Z)"
+                    match = re.search(pattern, text, re.DOTALL)
+                    return match.group(1).strip() if match else "該当内容を取得できませんでした。"
+
+                # ----------------------------
+                # 色を決定
+                # ----------------------------
+                def get_color(level):
+                    if "緊急" in level:
+                        return "#ff4b4b"
+                    elif "高" in level:
+                        return "#ff8c00"
+                    elif "中" in level:
+                        return "#f1c40f"
+                    else:
+                        return "#2ecc71"
+
+                risk_color = get_color(risk_level)
+
+                # ----------------------------
+                # カード表示
+                # ----------------------------
+                st.markdown("## 🚨 重要判断")
+
+                st.markdown(f"""
+                <div style="display:flex; gap:20px;">
+                    <div style="
+                        flex:1;
+                        padding:20px;
+                        border-radius:15px;
+                        background-color:{risk_color};
+                        color:white;
+                        text-align:center;
+                    ">
+                        <h3>リスクレベル</h3>
+                        <h2>{risk_level}</h2>
+                    </div>
+
+                    <div style="
+                        flex:1;
+                        padding:20px;
+                        border-radius:15px;
+                        background-color:#34495e;
+                        color:white;
+                        text-align:center;
+                    ">
+                        <h3>責任者共有</h3>
+                        <h2>{manager}</h2>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # ----------------------------
+                # 全文表示
+                # ----------------------------
+                st.markdown("## 📋 詳細対応")
+
+                tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+                    "第一声",
+                    "返答例",
+                    "初動対応",
+                    "補償・返金",
+                    "NG対応",
+                    "記録内容"
+                ])
+
+                with tab1:
+                    st.markdown(extract_section(answer, "お客様への第一声"))
+
+                with tab2:
+                    st.markdown(extract_section(answer, "お客様への返答例"))
+
+                with tab3:
+                    st.markdown(extract_section(answer, "スタッフの初動対応"))
+
+                with tab4:
+                    st.markdown(extract_section(answer, "補償・返金に関する注意"))
+
+                with tab5:
+                    st.markdown(extract_section(answer, "NG対応"))
+
+                with tab6:
+                    st.markdown(extract_section(answer, "記録すべき内容"))
+
+                st.markdown("## 📄 全文コピー用")
+
+                with st.expander("全文を表示する"):
+                    st.code(answer, language="markdown")
 
                 st.download_button(
-                    label="📄 結果をテキストで保存",
+                    label="📥 生成結果をテキスト保存",
                     data=answer,
                     file_name="complaint_response.txt",
-                    mime="text/plain"
+                    mime="text/plain",
+                    use_container_width=True
                 )
 
             except Exception as e:
