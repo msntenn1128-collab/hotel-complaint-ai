@@ -10,6 +10,9 @@ st.set_page_config(
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
+if "answer" not in st.session_state:
+    st.session_state.answer = None
+
 SYSTEM_PROMPT = """
 あなたは高級ホテル向けのクレーム対応支援AIです。
 目的は、ホテルスタッフが初動を誤らず、丁寧かつ安全に対応できるよう支援することです。
@@ -204,6 +207,8 @@ if generate:
                 
 
                 answer = response.choices[0].message.content
+
+                st.session_state.answer = answer
 
                 # ----------------------------
                 # リスク情報を抽出
