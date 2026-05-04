@@ -257,7 +257,7 @@ if generate:
                         <h2>{risk_level}</h2>
                     </div>
 
-                    <div style="
+                <div style="
                         flex:1;
                         padding:20px;
                         border-radius:15px;
