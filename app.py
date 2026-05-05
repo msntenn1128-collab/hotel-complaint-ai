@@ -177,6 +177,28 @@ if generate:
                 st.session_state.answer = answer
 
                 # ----------------------------
+                # Supabaseに保存
+                # ----------------------------
+                try:
+                    supabase.table("complaint_cases").insert({
+                        "complaint_type": complaint_type,
+                        "location": place,
+                        "emotion": emotion,
+                        "urgency": urgency,
+                        "complaint_text": complaint,
+                        "note": note,
+                        "risk_level": risk_level,
+                        "manager_required": manager,
+                        "ai_answer": answer
+                    }).execute()
+                
+                    st.success("データを保存しました")
+                
+                except Exception as e:
+                    st.error("DB保存でエラーが発生しました")
+                    st.code(str(e))
+
+                # ----------------------------
                 # リスク情報を抽出
                 # ----------------------------
                 risk_level = "不明"
