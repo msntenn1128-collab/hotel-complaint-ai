@@ -175,6 +175,23 @@ if generate:
                 answer = response.choices[0].message.content
 
                 st.session_state.answer = answer
+                # ----------------------------
+                # リスク情報を抽出
+                # ----------------------------
+                risk_level = "不明"
+                manager = "不明"
+
+                def extract_field(text, field):
+                    match = re.search(rf"{field}.*?\n(.*)", text)
+                    return match.group(1).strip() if match else "不明"
+
+                risk_level = extract_field(answer, "リスクレベル")
+                manager = extract_field(answer, "責任者共有の要否")
+
+                def extract_section(text, title):
+                    pattern = rf"## {title}\n(.*?)(?=\n## |\Z)"
+                    match = re.search(pattern, text, re.DOTALL)
+                    return match.group(1).strip() if match else "該当内容を取得できませんでした。"
 
                 # ----------------------------
                 # Supabaseに保存
@@ -198,23 +215,6 @@ if generate:
                     st.error("DB保存でエラーが発生しました")
                     st.code(str(e))
 
-                # ----------------------------
-                # リスク情報を抽出
-                # ----------------------------
-                risk_level = "不明"
-                manager = "不明"
-
-                def extract_field(text, field):
-                    match = re.search(rf"{field}.*?\n(.*)", text)
-                    return match.group(1).strip() if match else "不明"
-
-                risk_level = extract_field(answer, "リスクレベル")
-                manager = extract_field(answer, "責任者共有の要否")
-
-                def extract_section(text, title):
-                    pattern = rf"## {title}\n(.*?)(?=\n## |\Z)"
-                    match = re.search(pattern, text, re.DOTALL)
-                    return match.group(1).strip() if match else "該当内容を取得できませんでした。"
 
                 # ----------------------------
                 # 色を決定
